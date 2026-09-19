@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>2048</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-container">
+    <header class="header">
+      <h1 class="title">2048</h1>
+      <div class="scores">
+        <div class="score-box">
+          <div class="score-label">Score</div>
+          <div class="score-value" id="score">0</div>
+        </div>
+        <div class="score-box">
+          <div class="score-label">Best</div>
+          <div class="score-value" id="best">0</div>
+        </div>
+        <div class="score-box">
+          <div class="score-label">Moves</div>
+          <div class="score-value" id="moves">0</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="controls-row">
+      <p class="instructions">Swipe to move the tiles. Combine matching numbers to reach 2048!</p>
+      <button id="new-game-btn" class="new-game-btn">New Game</button>
+    </div>
+
+    <div class="board-wrapper">
+      <div class="grid-background" id="grid-background"></div>
+      <div class="tile-container" id="tile-container"></div>
+      <div class="game-message" id="game-message">
+        <p id="game-message-text"></p>
+        <button id="try-again-btn" class="new-game-btn">Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

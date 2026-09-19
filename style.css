@@ -1,0 +1,215 @@
+:root {
+  --grid-size: 4;
+  --cell-gap: 12px;
+  --board-bg: #bbada0;
+  --cell-bg: rgba(238, 228, 218, 0.35);
+  --text-dark: #776e65;
+  --text-light: #f9f6f2;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+  touch-action: none;
+  background: #faf8ef;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-dark);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.game-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin: 0;
+  color: #776e65;
+}
+
+.scores {
+  display: flex;
+  gap: 8px;
+}
+
+.score-box {
+  background: var(--board-bg);
+  border-radius: 6px;
+  padding: 6px 12px;
+  text-align: center;
+  min-width: 56px;
+}
+
+.score-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  color: #eee4da;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.instructions {
+  font-size: 0.85rem;
+  color: #776e65;
+  margin: 0;
+  flex: 1;
+}
+
+.new-game-btn {
+  background: #8f7a66;
+  color: var(--text-light);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.new-game-btn:active {
+  background: #6f5b4d;
+}
+
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--board-bg);
+  border-radius: 10px;
+  padding: var(--cell-gap);
+  touch-action: none;
+}
+
+.grid-background {
+  position: absolute;
+  inset: var(--cell-gap);
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), 1fr);
+  grid-template-rows: repeat(var(--grid-size), 1fr);
+  gap: var(--cell-gap);
+}
+
+.grid-background .grid-cell {
+  background: var(--cell-bg);
+  border-radius: 6px;
+}
+
+.tile-container {
+  position: absolute;
+  inset: var(--cell-gap);
+}
+
+.tile {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--text-dark);
+  background: #eee4da;
+  transition: top 0.1s ease-in-out, left 0.1s ease-in-out, opacity 0.1s ease-in-out;
+}
+
+.tile-new {
+  animation: appear 0.2s ease;
+}
+
+.tile-merged {
+  animation: pop 0.2s ease;
+  z-index: 2;
+}
+
+@keyframes appear {
+  0% { opacity: 0; transform: scale(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.tile[data-value="2"] { background: #eee4da; color: #776e65; }
+.tile[data-value="4"] { background: #ede0c8; color: #776e65; }
+.tile[data-value="8"] { background: #f2b179; color: #f9f6f2; }
+.tile[data-value="16"] { background: #f59563; color: #f9f6f2; }
+.tile[data-value="32"] { background: #f67c5f; color: #f9f6f2; }
+.tile[data-value="64"] { background: #f65e3b; color: #f9f6f2; }
+.tile[data-value="128"] { background: #edcf72; color: #f9f6f2; font-size: 1.5rem; }
+.tile[data-value="256"] { background: #edcc61; color: #f9f6f2; font-size: 1.5rem; }
+.tile[data-value="512"] { background: #edc850; color: #f9f6f2; font-size: 1.5rem; }
+.tile[data-value="1024"] { background: #edc53f; color: #f9f6f2; font-size: 1.2rem; }
+.tile[data-value="2048"] { background: #edc22e; color: #f9f6f2; font-size: 1.2rem; }
+
+.game-message {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 228, 218, 0.85);
+  border-radius: 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 20px;
+}
+
+.game-message.show {
+  display: flex;
+}
+
+.game-message p {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #776e65;
+  margin: 0;
+}
+
+@media (max-width: 400px) {
+  .title { font-size: 1.9rem; }
+  .tile { font-size: 1.4rem; }
+  .instructions { font-size: 0.75rem; }
+}
