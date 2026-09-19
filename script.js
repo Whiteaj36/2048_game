@@ -4,6 +4,10 @@
   const GRID_SIZE = 4;
   const CELL_GAP = 12;
   const SWIPE_THRESHOLD = 20;
+  const DOUBLE_TAP_DELAY = 300;
+  const DOUBLE_TAP_MAX_DIST = 60;
+  const CENTER_ZONE_MIN = 0.25;
+  const CENTER_ZONE_MAX = 0.75;
 
   const tileContainer = document.getElementById("tile-container");
   const gridBackground = document.getElementById("grid-background");
@@ -110,7 +114,19 @@
         el.style.lineHeight = cellSize + "px";
         if (tile.isNew) el.classList.add("tile-new");
         if (tile.merged) el.classList.add("tile-merged");
+        if (tile.shuffled) el.classList.add("tile-shuffled");
         tileContainer.appendChild(el);
+      }
+    }
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const tile = grid[r][c];
+        if (tile) {
+          tile.isNew = false;
+          tile.merged = false;
+          tile.shuffled = false;
+        }
       }
     }
   }
@@ -231,6 +247,84 @@
     gameMessage.classList.add("show");
   }
 
+  // Randomly repositions the tiles already on the board (values unchanged,
+  // no merging, doesn't count toward the move counter).
+  function shuffleBoard() {
+    if (gameOver) return;
+
+    const tiles = [];
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (grid[r][c]) tiles.push(grid[r][c]);
+      }
+    }
+    if (tiles.length === 0) return;
+
+    const positions = [];
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        positions.push({ r, c });
+      }
+    }
+    for (let i = positions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [positions[i], positions[j]] = [positions[j], positions[i]];
+    }
+
+    grid = createEmptyGrid();
+    tiles.forEach((tile, i) => {
+      const { r, c } = positions[i];
+      tile.r = r;
+      tile.c = c;
+      tile.isNew = false;
+      tile.merged = false;
+      tile.shuffled = true;
+      grid[r][c] = tile;
+    });
+
+    render();
+
+    if (!canMove()) {
+      gameOver = true;
+      showMessage("Game over!");
+    }
+  }
+
+  function isCenterTap(clientX, clientY) {
+    const rect = boardWrapper.getBoundingClientRect();
+    const relX = (clientX - rect.left) / rect.width;
+    const relY = (clientY - rect.top) / rect.height;
+    return (
+      relX > CENTER_ZONE_MIN &&
+      relX < CENTER_ZONE_MAX &&
+      relY > CENTER_ZONE_MIN &&
+      relY < CENTER_ZONE_MAX
+    );
+  }
+
+  let lastTapTime = 0;
+  let lastTapX = 0;
+  let lastTapY = 0;
+
+  function handleTap(clientX, clientY) {
+    const now = Date.now();
+    const sinceLastTap = now - lastTapTime;
+    const distFromLastTap = Math.hypot(clientX - lastTapX, clientY - lastTapY);
+
+    if (
+      sinceLastTap < DOUBLE_TAP_DELAY &&
+      distFromLastTap < DOUBLE_TAP_MAX_DIST &&
+      isCenterTap(clientX, clientY)
+    ) {
+      lastTapTime = 0;
+      shuffleBoard();
+    } else {
+      lastTapTime = now;
+      lastTapX = clientX;
+      lastTapY = clientY;
+    }
+  }
+
   // Touch swipe handling
   let touchStartX = 0;
   let touchStartY = 0;
@@ -266,7 +360,10 @@
       const absX = Math.abs(dx);
       const absY = Math.abs(dy);
 
-      if (Math.max(absX, absY) < SWIPE_THRESHOLD) return;
+      if (Math.max(absX, absY) < SWIPE_THRESHOLD) {
+        handleTap(touch.clientX, touch.clientY);
+        return;
+      }
 
       if (absX > absY) {
         move(dx > 0 ? "right" : "left");
@@ -276,6 +373,11 @@
     },
     { passive: true }
   );
+
+  // Double-click support for desktop mice (mirrors the double-tap gesture)
+  boardWrapper.addEventListener("dblclick", (e) => {
+    if (isCenterTap(e.clientX, e.clientY)) shuffleBoard();
+  });
 
   // Keyboard support for desktop testing
   window.addEventListener("keydown", (e) => {
